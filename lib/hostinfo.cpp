@@ -72,6 +72,7 @@ void HOST_INFO::clear_host_info() {
     safe_strcpy(os_version, "");
 
     wsl_available = false;
+    docker_use =false;
 #ifdef _WIN64
     wsls.clear();
 #endif
@@ -139,6 +140,7 @@ int HOST_INFO::parse(XML_PARSER& xp, bool static_items_only) {
             continue;
         }
 #endif
+        if (xp.parse_bool("docker_use", docker_use)) continue;
         if (xp.parse_str("product_name", product_name, sizeof(product_name))) continue;
         if (xp.parse_str("virtualbox_version", virtualbox_version, sizeof(virtualbox_version))) continue;
         if (xp.match_tag("coprocs")) {
@@ -207,7 +209,8 @@ int HOST_INFO::write(
         "    <os_name>%s</os_name>\n"
         "    <os_version>%s</os_version>\n"
         "    <n_usable_coprocs>%d</n_usable_coprocs>\n"
-        "    <wsl_available>%d</wsl_available>\n",
+        "    <wsl_available>%d</wsl_available>\n"
+        "    <docker_use>%d</docker_use>\n",
         host_cpid,
         p_ncpus,
         pv,
@@ -227,10 +230,11 @@ int HOST_INFO::write(
         osv,
         coprocs.ndevs(),
 #ifdef _WIN64
-        wsl_available ? 1 : 0
+        wsl_available ? 1 : 0,
 #else
-        0
+        0,
 #endif
+        docker_use ? 1 : 0
     );
 #ifdef _WIN64
     if (wsl_available) {

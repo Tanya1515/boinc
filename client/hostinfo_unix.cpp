@@ -1235,6 +1235,56 @@ int HOST_INFO::get_virtualbox_version() {
     return 0;
 }
 
+
+int HOST_INFO::get_docker_info(bool& docker_use){
+    char buf[256];
+    char buf_command[256];
+    FILE* fd;
+    std::size_t paths_count = 0;
+    const char* docker_locations[25];
+    char docker_location[MAXPATHLEN];
+    char docker_cmd [MAXPATHLEN+35];
+
+    char* docker_command = "which -a docker 2>&1";
+    fd = popen(docker_command, "r");
+    if (fd) {
+        while (!feof(fd)){
+            if (fgets(buf, sizeof(buf), fd)){
+                int i, j;
+                for (i = 0, j = 0; buf[i]; i++) {
+                    if (buf[i] != '\n') {
+                        buf[j++] = buf[i];
+                    }
+                }
+                buf[j] = '\0';
+                if (!(access(buf, X_OK))) {
+                    safe_strcpy(docker_location, buf);
+                    docker_locations[paths_count] = docker_location;
+                    ++paths_count;
+                }
+            }
+        }
+    }
+    pclose(fd);
+    docker_locations[paths_count] = NULL;
+    for (size_t i = 0; i < paths_count; ++i ){
+            safe_strcpy(docker_cmd, docker_locations[i]);
+            safe_strcat(docker_cmd, " ps -a 2>&1");
+            fd = popen(docker_cmd, "r");
+            if (fd){
+                if (fgets(buf_command, sizeof(buf_command), fd)){
+                    std::string string = std::string(buf_command);
+                    if (string.find("COMMAND") != std::string::npos){
+                        docker_use = true;
+                    }
+                }
+            }
+            pclose(fd);
+    }
+    return 0;
+}
+
+
 // get p_vendor, p_model, p_features
 //
 int HOST_INFO::get_cpu_info() {
@@ -1680,6 +1730,10 @@ int HOST_INFO::get_host_info(bool init) {
 
     if (!cc_config.dont_use_vbox) {
         get_virtualbox_version();
+    }
+
+    if(!cc_config.dont_use_docker){
+        get_docker_info(docker_use);
     }
 
     get_cpu_info();

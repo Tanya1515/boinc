@@ -1543,6 +1543,47 @@ int get_network_usage_totals(unsigned int& total_received, unsigned int& total_s
 }
 
 
+//check if docker is installed
+//
+int HOST_INFO::get_docker_info(bool& docker_use){
+    char buf[256];
+    FILE* fd;
+    FILE *fd_1;
+
+    char* docker_command = "wsl which -a docker 2>&1";
+    fd = popen(docker_command, "r");
+    if (fd) {
+        while (!feof(fd)){
+            if (fgets(buf + 4, sizeof(buf), fd)){
+                buf[0] = 'w';
+                buf[1] = 's';
+                buf[2] = 'l';
+                buf[3] = ' ';
+                int i, j;
+                for (i = 0, j = 0; buf[i]; i++) {
+                    if (buf[i] != '\n') {
+                        buf[j++] = buf[i];
+                    }
+                }
+                buf[j] = '\0';
+                docker_command = strcat(buf, " ps 2>&1");
+                fd_1 = popen(docker_command, "r");
+                if (fd_1){
+                    if (fgets(buf, sizeof(buf), fd_1)){
+                        std::string string = std::string(buf);
+                        if (string.find("COMMAND") != std::string::npos){
+                            docker_check = true;
+                        }
+                    }
+                }
+                pclose(fd_1);
+            }
+        }
+    }
+    pclose(fd);
+    return 0;
+}
+
 // see if Virtualbox is installed
 //
 int HOST_INFO::get_virtualbox_version() {
@@ -1665,6 +1706,26 @@ int HOST_INFO::get_host_info(bool init) {
             get_wsl_information(wsl_available, wsls);
         }
     }
+    if ((!cc_config.dont_use_docker) && (!cc_config.dont_use_wsl)){
+        //check if wsl is available
+        OSVERSIONINFOEX osvi;
+        if (get_OSVERSIONINFO(osvi) && osvi.dwMajorVersion >= 10) {
+            get_wsl_information(wsl_available, wsls);
+        }
+        //get info about wsl version
+        //if version is 2, than get info about docker on the host
+        if (wsl_available){
+            for (size_t i = 0; i < wsls.wsls.size(); ++i){
+                const WSL& wsl = wsls.wsls[i];
+                if (wsl.is_default){
+                    if (wsl.version == "2"){
+                        get_docker_info(docker_use);
+                    }
+                }
+            }
+        }
+    }
+
 #endif
     if (!cc_config.dont_use_vbox) {
         get_virtualbox_version();

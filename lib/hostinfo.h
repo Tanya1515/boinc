@@ -82,6 +82,7 @@ public:
 
     // WSL information for Win10 only
     bool wsl_available;
+    bool docker_use;
 #ifdef _WIN64
     WSLS wsls;
 #endif
@@ -124,6 +125,7 @@ public:
     int get_host_battery_state();
     int get_local_network_info();
     int get_virtualbox_version();
+    int get_docker_info(bool& docker_use);
     void make_random_string(const char* salt, char* out);
     void generate_host_cpid();
     static bool parse_linux_os_info(
