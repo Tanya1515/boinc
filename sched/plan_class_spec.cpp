@@ -461,7 +461,7 @@ bool PLAN_CLASS_SPEC::check(
             return false;
         }
         if (!(sreq.host.docker_use)) {
-            add_no_work_message("Docker is not installed");
+            add_no_work_message("Docker is not installed or is not available");
             return false;
         }
     }
