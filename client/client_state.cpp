@@ -253,11 +253,11 @@ void CLIENT_STATE::show_host_info() {
             const WSL& wsl = host_info.wsls.wsls[i];
             if (wsl.is_default) {
                 msg_printf(NULL, MSG_INFO,
-                    "   [%s] (default): %s (%s)", wsl.distro_name.c_str(), wsl.name.c_str(), wsl.version.c_str()
+                    "   [%s] (default): %s version: (%s)", wsl.distro_name.c_str(), wsl.name.c_str(), wsl.version.c_str()
                 );
             } else {
                 msg_printf(NULL, MSG_INFO,
-                    "   [%s]: %s (%s)", wsl.distro_name.c_str(), wsl.name.c_str(), wsl.version.c_str()
+                    "   [%s]: %s version: (%s)", wsl.distro_name.c_str(), wsl.name.c_str(), wsl.version.c_str()
                 );
             }
         }
