@@ -375,6 +375,9 @@ struct HOST {
     bool wsl_available;
     WSLS wsls;
 
+    //Docker available
+    bool docker_use;
+
     // stuff from time_stats
     double cpu_and_network_available_frac;
     double client_start_time;

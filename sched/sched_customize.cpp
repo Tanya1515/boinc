@@ -873,6 +873,23 @@ static inline bool app_plan_opencl(
 // "mt" is tailored to the needs of CERN:
 // use 1 or 2 CPUs
 
+static inline bool app_plan_docker(
+    SCHEDULER_REQUEST& sreq, char* plan_class, HOST_USAGE& hu
+){
+     if (sreq.core_client_major_version < 8) {
+        add_no_work_message("BOINC client 8.0+ required for Virtualbox jobs");
+        return false;
+    }
+
+     if (!(sreq.host.docker_use)) {
+            add_no_work_message("Docker is not installed or is not available");
+            return false;
+        }
+     return true;
+
+}
+
+
 static inline bool app_plan_vbox(
     SCHEDULER_REQUEST& sreq, char* plan_class, HOST_USAGE& hu
 ) {
@@ -1019,6 +1036,8 @@ bool app_plan(SCHEDULER_REQUEST& sreq, char* plan_class, HOST_USAGE& hu, const W
         return app_plan_sse3(sreq, hu);
     } else if (strstr(plan_class, "vbox")) {
         return app_plan_vbox(sreq, plan_class, hu);
+    } else if (strstr(plan_class, "docker")){
+        return app_plan_docker(sreq, plan_class, hu);
     }
     log_messages.printf(MSG_CRITICAL,
         "Unknown plan class: %s\n", plan_class
