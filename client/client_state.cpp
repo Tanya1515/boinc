@@ -280,6 +280,12 @@ void CLIENT_STATE::show_host_info() {
         }
 #endif
     }
+    if (host_info.docker_use){
+        msg_printf(NULL, MSG_INFO, "Docker is installed and available");
+    }
+    else{
+        msg_printf(NULL, MSG_INFO, "Docker is not installed or is not available for running task");
+    }
 }
 
 int rsc_index(const char* name) {
