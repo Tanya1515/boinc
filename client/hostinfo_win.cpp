@@ -1566,13 +1566,16 @@ int HOST_INFO::get_docker_info(bool& docker_use){
                     }
                 }
                 buf[j] = '\0';
-                docker_command = strcat(buf, " ps 2>&1");
+                docker_command = strcat(buf, " run --rm hello-world 2>&1");
                 fd_1 = _popen(docker_command, "r");
                 if (fd_1){
-                    if (fgets(buf, sizeof(buf), fd_1)){
-                        std::string string = std::string(buf);
-                        if (string.find("COMMAND") != std::string::npos){
-                            docker_use = true;
+                    while (!feof(fd_1)){
+                        if (fgets(buf, sizeof(buf), fd_1)){
+                            std::string string = std::string(buf);
+                            if (string.find("Hello from Docker!") != std::string::npos){
+                                docker_use = true;
+                                break;
+                            }
                         }
                     }
                 }

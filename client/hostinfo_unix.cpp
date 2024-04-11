@@ -1269,13 +1269,16 @@ int HOST_INFO::get_docker_info(bool& docker_use){
     docker_locations[paths_count] = NULL;
     for (size_t i = 0; i < paths_count; ++i ){
             safe_strcpy(docker_cmd, docker_locations[i]);
-            safe_strcat(docker_cmd, " ps -a 2>&1");
+            safe_strcat(docker_cmd, " run --rm hello-world 2>&1");
             fd = popen(docker_cmd, "r");
             if (fd){
-                if (fgets(buf_command, sizeof(buf_command), fd)){
-                    std::string string = std::string(buf_command);
-                    if (string.find("COMMAND") != std::string::npos){
-                        docker_use = true;
+                while (!feof(fd)){
+                    if (fgets(buf_command, sizeof(buf_command), fd)){
+                        std::string string = std::string(buf_command);
+                        if (string.find("Hello from Docker!") != std::string::npos){
+                            docker_use = true;
+                            break;
+                        }
                     }
                 }
             }
