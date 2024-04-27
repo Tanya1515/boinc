@@ -874,18 +874,29 @@ static inline bool app_plan_opencl(
 // use 1 or 2 CPUs
 
 static inline bool app_plan_docker(
-    SCHEDULER_REQUEST& sreq, char* plan_class, HOST_USAGE& hu
+    SCHEDULER_REQUEST& sreq, char* plan_class
 ){
      if (sreq.core_client_major_version < 8) {
-        add_no_work_message("BOINC client 8.0+ required for Virtualbox jobs");
+        add_no_work_message("BOINC client 8.0+ required for Docker jobs");
         return false;
     }
 
-     if (!(sreq.host.docker_use)) {
-            add_no_work_message("Docker is not installed or is not available");
-            return false;
-        }
-     return true;
+    if (!(sreq.host.docker_use)) {
+        add_no_work_message("Docker is not installed or is not available");
+        return false;
+    }
+
+    if ((strstr(plan_class, "v1")) && (!(strstr(sreq.host.docker_compose_version, "v1")))){
+        add_no_work_message("Docker compose (older version: docker-compose) is required, but is not installed or is not available");
+        return false;
+    }
+
+    if ((strstr(plan_class, "v2")) && (!(strstr(sreq.host.docker_compose_version, "v2")))){
+        add_no_work_message("Docker compose (newer version: docker compose) is required, but is not installed or is not available");
+        return false;
+    }
+
+    return true;
 
 }
 

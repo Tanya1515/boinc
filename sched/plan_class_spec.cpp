@@ -464,6 +464,16 @@ bool PLAN_CLASS_SPEC::check(
             add_no_work_message("Docker is not installed or is not available");
             return false;
         }
+
+        if ((strstr(docker_compose_version, "v1")) && (!(strstr(sreq.host.docker_compose_version, "v1")))){
+            add_no_work_message("Docker compose (older version: docker-compose) is required, but is not installed or is not available");
+            return false;
+        }
+
+        if ((strstr(docker_compose_version, "v2")) && (!(strstr(sreq.host.docker_compose_version, "v2")))){
+            add_no_work_message("Docker compose (newer version: docker compose) is required, but is not installed or is not available");
+            return false;
+        }
     }
 
     if (virtualbox) {
@@ -1070,7 +1080,7 @@ bool PLAN_CLASS_SPEC::check(
 }
 
 bool PLAN_CLASS_SPECS::check(
-    SCHEDULER_REQUEST& sreq, char* plan_class, HOST_USAGE& hu,
+    SCHEDULER_REQUEST& sreq, char* plan_class, & hu,
     const WORKUNIT* wu
 ) {
     for (unsigned int i=0; i<classes.size(); i++) {
@@ -1111,6 +1121,7 @@ int PLAN_CLASS_SPEC::parse(XML_PARSER& xp) {
         if (xp.parse_bool("opencl", opencl)) continue;
         if (xp.parse_bool("virtualbox", virtualbox)) continue;
         if (xp.parse_bool("docker", docker)) continue;
+        if (xp.parse_str("docker_compose_version", docker_compose_version, sizeof(docker_compose_version))) continue;
         if (xp.parse_bool("is64bit", is64bit)) continue;
         if (xp.parse_str("cpu_feature", buf, sizeof(buf))) {
             cpu_features.push_back(" " + (string)buf + " ");
@@ -1258,6 +1269,7 @@ PLAN_CLASS_SPEC::PLAN_CLASS_SPEC() {
     opencl = false;
     virtualbox = false;
     docker = false;
+    strcpy(docker_compose_version, "");
     is64bit = false;
     min_ncpus = 0;
     max_threads = 1;

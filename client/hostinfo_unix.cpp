@@ -138,6 +138,7 @@ using std::min;
 #include <mach-o/fat.h>
 #include <mach/machine.h>
 #include <libkern/OSByteOrder.h>
+#include <fstream>
 
 extern int compareOSVersionTo(int toMajor, int toMinor);
 
@@ -1236,6 +1237,44 @@ int HOST_INFO::get_virtualbox_version() {
 }
 
 
+int HOST_INFO::get_docker_compose_info(){
+    FILE* fd;
+    char buf[MAXPATHLEN];
+
+    std::ofstream compose_file ("docker-compose.yaml");
+    compose_file << "version: \"2\"\nservices: \n  hello: \n    image: \"hello-world\" \n" << std::endl;
+
+    char* docker_command = "docker-compose up 2>&1";
+    fd = popen(docker_command, "r");
+    if (fd){
+        while(!feof(fd)){
+            if (fgets(buf, sizeof(buf), fd)){
+                if (strstr(buf, "Hello from Docker!")){
+                    safe_strcat(docker_compose_version, "v1");
+                    break;
+                }
+            }
+        }
+    }
+
+    docker_command = "docker compose up 2>&1";
+    fd = popen(docker_command, "r");
+    if (fd){
+        while(!feof(fd)){
+            if (fgets(buf, sizeof(buf), fd)){
+                if (strstr(buf, "Hello from Docker!")){
+                    safe_strcat(docker_compose_version, "v2");
+                    break;
+                }
+            }
+        }
+    }
+
+    std::remove("docker-compose.yaml");
+
+    return 0;
+}
+
 int HOST_INFO::get_docker_info(bool& docker_use){
     char buf[256];
     char buf_command[256];
@@ -1737,6 +1776,10 @@ int HOST_INFO::get_host_info(bool init) {
 
     if(!cc_config.dont_use_docker){
         get_docker_info(docker_use);
+    }
+
+    if(!cc_config.dont_use_docker_compose){
+        get_docker_compose_info();
     }
 
     get_cpu_info();

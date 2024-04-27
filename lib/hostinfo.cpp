@@ -73,6 +73,7 @@ void HOST_INFO::clear_host_info() {
 
     wsl_available = false;
     docker_use =false;
+    safe_strcpy(docker_compose_version, "");
 #ifdef _WIN64
     wsls.clear();
 #endif
@@ -141,6 +142,7 @@ int HOST_INFO::parse(XML_PARSER& xp, bool static_items_only) {
         }
 #endif
         if (xp.parse_bool("docker_use", docker_use)) continue;
+        if (xp.parse_str("docker_compose_version", docker_compose_version, sizeof(docker_compose_version))) continue;
         if (xp.parse_str("product_name", product_name, sizeof(product_name))) continue;
         if (xp.parse_str("virtualbox_version", virtualbox_version, sizeof(virtualbox_version))) continue;
         if (xp.match_tag("coprocs")) {
@@ -259,6 +261,14 @@ int HOST_INFO::write(
         xml_escape(virtualbox_version, buf, sizeof(buf));
         out.printf(
             "    <virtualbox_version>%s</virtualbox_version>\n",
+            buf
+        );
+    }
+    if (strlen(docker_compose_version)){
+        char buf[256];
+        xml_escape(docker_compose_version, buf, sizeof(buf));
+        out.printf(
+            "    <docker_compose_version>%s</docker_compose_version>\n",
             buf
         );
     }

@@ -201,6 +201,9 @@ void CC_CONFIG::show() {
     if (dont_use_docker){
         msg_printf(NULL, MSG_INFO, "Config: don't use the Docker");
     }
+     if (dont_use_docker_compose){
+        msg_printf(NULL, MSG_INFO, "Config: don't use the Docker compose");
+    }
     for (i=0; i<alt_platforms.size(); i++) {
         msg_printf(NULL, MSG_INFO,
             "Config: alternate platform: %s", alt_platforms[i].c_str()
@@ -371,6 +374,7 @@ int CC_CONFIG::parse_options_client(XML_PARSER& xp) {
         if (xp.parse_bool("dont_use_vbox", dont_use_vbox)) continue;
         if (xp.parse_bool("dont_use_wsl", dont_use_wsl)) continue;
         if (xp.parse_bool("dont_use_docker", dont_use_docker)) continue;
+        if (xp.parse_bool("dont_use_docker_compose", dont_use_docker_compose)) continue;
         if (xp.match_tag("exclude_gpu")) {
             EXCLUDE_GPU eg;
             retval = eg.parse(xp);

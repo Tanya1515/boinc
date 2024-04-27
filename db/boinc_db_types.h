@@ -377,6 +377,7 @@ struct HOST {
 
     //Docker available
     bool docker_use;
+    char docker_compose_version[256];
 
     // stuff from time_stats
     double cpu_and_network_available_frac;
