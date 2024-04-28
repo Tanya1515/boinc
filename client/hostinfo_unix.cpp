@@ -20,7 +20,7 @@
 // Try to keep this well-organized and not nested.
 
 #include "version.h"         // version numbers from autoconf
-
+#include <fstream>
 #include "cpp.h"
 #include "config.h"
 
@@ -138,7 +138,6 @@ using std::min;
 #include <mach-o/fat.h>
 #include <mach/machine.h>
 #include <libkern/OSByteOrder.h>
-#include <fstream>
 
 extern int compareOSVersionTo(int toMajor, int toMinor);
 
