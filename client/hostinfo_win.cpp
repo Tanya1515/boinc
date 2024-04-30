@@ -1620,12 +1620,13 @@ int HOST_INFO::get_docker_info(bool& docker_use){
                             }
                         }
                     }
-                }
                 _pclose(fd_1);
+                }
             }
+            
         }
+        _pclose(fd);
     }
-    _pclose(fd);
     return 0;
     
 }

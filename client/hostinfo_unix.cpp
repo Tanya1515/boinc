@@ -1280,7 +1280,6 @@ int HOST_INFO::get_docker_info(bool& docker_use){
     FILE* fd;
     std::size_t paths_count = 0;
     const char* docker_locations[25];
-    char docker_location[MAXPATHLEN];
     char docker_cmd [MAXPATHLEN+35];
 
     char* docker_command = "which -a docker 2>&1";
@@ -1296,14 +1295,13 @@ int HOST_INFO::get_docker_info(bool& docker_use){
                 }
                 buf[j] = '\0';
                 if (!(access(buf, X_OK))) {
-                    safe_strcpy(docker_location, buf);
-                    docker_locations[paths_count] = docker_location;
+                    docker_locations[paths_count] = buf;
                     ++paths_count;
                 }
             }
         }
-    }
     pclose(fd);
+    }
     docker_locations[paths_count] = NULL;
     for (size_t i = 0; i < paths_count; ++i ){
             safe_strcpy(docker_cmd, docker_locations[i]);
@@ -1319,8 +1317,8 @@ int HOST_INFO::get_docker_info(bool& docker_use){
                         }
                     }
                 }
-            }
             pclose(fd);
+            }
     }
     return 0;
 }
