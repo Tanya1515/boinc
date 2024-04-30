@@ -29,6 +29,8 @@
 #include "str_util.h"
 #include "str_replace.h"
 #include "util.h"
+#include <fstream>
+
 
 #include "client_msgs.h"
 #include "client_types.h"
@@ -1542,6 +1544,46 @@ int get_network_usage_totals(unsigned int& total_received, unsigned int& total_s
     return iRetVal;
 }
 
+int HOST_INFO::get_docker_compose_info(){
+    FILE* fd;
+    char buf[MAXPATHLEN];
+
+    std::ofstream compose_file ("docker-compose.yaml");
+    compose_file << "version: \"2\"\nservices: \n  hello: \n    image: \"hello-world\" \n" << std::endl;
+
+    char* docker_command = "wsl docker-compose up 2>&1";
+    fd = _popen(docker_command, "r");
+    if (fd){
+        while(!feof(fd)){
+            if (fgets(buf, sizeof(buf), fd)){
+                if (strstr(buf, "Hello from Docker!")){
+                    safe_strcat(docker_compose_version, "v1");
+                    break;
+                }
+            }
+        }
+        _pclose(fd);
+    }
+
+    docker_command = "wsl docker compose up 2>&1";
+    fd = _popen(docker_command, "r");
+    if (fd){
+        while(!feof(fd)){
+            if (fgets(buf, sizeof(buf), fd)){
+                if (strstr(buf, "Hello from Docker!")){
+                    safe_strcat(docker_compose_version, "v2");
+                    break;
+                }
+            }
+        }
+        _pclose(fd);
+    }
+
+    std::remove("docker-compose.yaml");
+
+    return 0;
+}
+
 
 //check if docker is installed
 //
@@ -1718,31 +1760,14 @@ int HOST_INFO::get_host_info(bool init) {
                 if (wsl.is_default){
                         if (wsl.version.find("WSL2") != std::string::npos){
                             get_docker_info(docker_use);
+                            if (!cc_config.dont_use_docker_compose){
+                                get_docker_compose_info();
+                            }
                         }
                 }
             }
         }
     }
-
-    /*if ((!cc_config.dont_use_docker) && (!cc_config.dont_use_wsl)){
-        //check if wsl is available
-        OSVERSIONINFOEX osvi;
-        if (get_OSVERSIONINFO(osvi) && osvi.dwMajorVersion >= 10) {
-            get_wsl_information(wsl_available, wsls);
-        }
-        //get info about wsl version
-        //if version is 2, than get info about docker on the host
-        if (wsl_available){
-            for (size_t i = 0; i < wsls.wsls.size(); ++i){
-                const WSL& wsl = wsls.wsls[i];
-                if (wsl.is_default){
-                    if (wsl.version. == "2"){
-                        get_docker_info(docker_use);
-                    }
-                }
-            }
-        }
-    }*/
 
 #endif
     if (!cc_config.dont_use_vbox) {
