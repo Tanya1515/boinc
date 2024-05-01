@@ -1298,7 +1298,13 @@ int HOST_INFO::get_docker_info(bool& docker_use){
     if (fd) {
         while (!feof(fd)){
             if (fgets(buf, sizeof(buf), fd)){
-                strip_whitespace(buf);
+                int i, j;
+                for (i = 0, j = 0; buf[i]; i++) {
+                    if (buf[i] != '\n') {
+                        buf[j++] = buf[i];
+                    }
+                }
+                buf[j] = '\0';
                 if (!(access(buf, X_OK))) {
                     docker_locations[paths_count] = buf;
                     ++paths_count;
