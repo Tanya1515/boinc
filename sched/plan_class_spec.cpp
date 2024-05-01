@@ -1080,7 +1080,7 @@ bool PLAN_CLASS_SPEC::check(
 }
 
 bool PLAN_CLASS_SPECS::check(
-    SCHEDULER_REQUEST& sreq, char* plan_class, & hu,
+    SCHEDULER_REQUEST& sreq, char* plan_class, HOST_USAGE& hu,
     const WORKUNIT* wu
 ) {
     for (unsigned int i=0; i<classes.size(); i++) {

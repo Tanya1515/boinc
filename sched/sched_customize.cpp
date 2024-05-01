@@ -1048,7 +1048,7 @@ bool app_plan(SCHEDULER_REQUEST& sreq, char* plan_class, HOST_USAGE& hu, const W
     } else if (strstr(plan_class, "vbox")) {
         return app_plan_vbox(sreq, plan_class, hu);
     } else if (strstr(plan_class, "docker")){
-        return app_plan_docker(sreq, plan_class, hu);
+        return app_plan_docker(sreq, plan_class);
     }
     log_messages.printf(MSG_CRITICAL,
         "Unknown plan class: %s\n", plan_class
