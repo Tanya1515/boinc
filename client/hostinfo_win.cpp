@@ -1544,6 +1544,8 @@ int get_network_usage_totals(unsigned int& total_received, unsigned int& total_s
     return iRetVal;
 }
 
+//check if docker compose or docker-compose is installed on volunteer's host
+//
 int HOST_INFO::get_docker_compose_info(){
     FILE* fd;
     char buf[MAXPATHLEN];
@@ -1581,11 +1583,17 @@ int HOST_INFO::get_docker_compose_info(){
 
     std::remove("docker-compose.yaml");
 
+    if (!(strstr(docker_compose_version, "v1"))){
+        if (!(strstr(docker_compose_version, "v2"))){
+            safe_strcat(docker_compose_version, "not_used")
+        }
+    }
+
     return 0;
 }
 
 
-//check if docker is installed
+//check if docker is installed on volunteer's host
 //
 int HOST_INFO::get_docker_info(bool& docker_use){
     char buf[256];
@@ -1613,22 +1621,19 @@ int HOST_INFO::get_docker_info(bool& docker_use){
                 if (fd_1){
                     while (!feof(fd_1)){
                         if (fgets(buf, sizeof(buf), fd_1)){
-                            std::string string = std::string(buf);
-                            if (string.find("Hello from Docker!") != std::string::npos){
+                            if (strstr(buf, "Hello from Docker!")){
                                 docker_use = true;
                                 break;
                             }
                         }
                     }
-                _pclose(fd_1);
+                    _pclose(fd_1);
                 }
             }
-            
         }
         _pclose(fd);
     }
     return 0;
-    
 }
 
 // see if Virtualbox is installed

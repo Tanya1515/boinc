@@ -1231,11 +1231,11 @@ int HOST_INFO::get_virtualbox_version() {
             pclose(fd);
         }
     }
-
     return 0;
 }
 
-
+//check if docker compose or docker-compose is installed on volunteer's host
+//
 int HOST_INFO::get_docker_compose_info(){
     FILE* fd;
     char buf[MAXPATHLEN];
@@ -1254,6 +1254,7 @@ int HOST_INFO::get_docker_compose_info(){
                 }
             }
         }
+        pclose(fd);
     }
 
     docker_command = "docker compose up 2>&1";
@@ -1267,13 +1268,23 @@ int HOST_INFO::get_docker_compose_info(){
                 }
             }
         }
+        pclose(fd);
     }
 
     std::remove("docker-compose.yaml");
 
+    if (!(strstr(docker_compose_version, "v1"))){
+        if (!(strstr(docker_compose_version, "v2"))){
+            safe_strcat(docker_compose_version, "not_used")
+        }
+    }
+
     return 0;
 }
 
+
+//check if docker is installed on volunteer's host
+//
 int HOST_INFO::get_docker_info(bool& docker_use){
     char buf[256];
     char buf_command[256];
@@ -1287,38 +1298,31 @@ int HOST_INFO::get_docker_info(bool& docker_use){
     if (fd) {
         while (!feof(fd)){
             if (fgets(buf, sizeof(buf), fd)){
-                int i, j;
-                for (i = 0, j = 0; buf[i]; i++) {
-                    if (buf[i] != '\n') {
-                        buf[j++] = buf[i];
-                    }
-                }
-                buf[j] = '\0';
+                strip_whitespace(buf);
                 if (!(access(buf, X_OK))) {
                     docker_locations[paths_count] = buf;
                     ++paths_count;
                 }
             }
         }
-    pclose(fd);
+        pclose(fd);
     }
-    docker_locations[paths_count] = NULL;
+
     for (size_t i = 0; i < paths_count; ++i ){
-            safe_strcpy(docker_cmd, docker_locations[i]);
-            safe_strcat(docker_cmd, " run --rm hello-world 2>&1");
-            fd = popen(docker_cmd, "r");
-            if (fd){
-                while (!feof(fd)){
-                    if (fgets(buf_command, sizeof(buf_command), fd)){
-                        std::string string = std::string(buf_command);
-                        if (string.find("Hello from Docker!") != std::string::npos){
-                            docker_use = true;
-                            break;
-                        }
+        safe_strcpy(docker_cmd, docker_locations[i]);
+        safe_strcat(docker_cmd, " run --rm hello-world 2>&1");
+        fd = popen(docker_cmd, "r");
+        if (fd){
+            while (!feof(fd)){
+                if (fgets(buf_command, sizeof(buf_command), fd)){
+                    if (strstr(buf, "Hello from Docker!")){
+                        docker_use = true;
+                        break;
                     }
                 }
-            pclose(fd);
             }
+            pclose(fd);
+        }
     }
     return 0;
 }

@@ -295,11 +295,10 @@ void CLIENT_STATE::show_host_info() {
         }else if (strstr(host_info.docker_compose_version, "v2")){
             msg_printf(NULL, MSG_INFO, "Docker compose (new version: docker compose) is installed and available for running task");
         }
+        else{
+            msg_printf(NULL, MSG_INFO, "Docker compose is not installed or is not available for running task");
+        }
     }
-    else{
-        msg_printf(NULL, MSG_INFO, "Docker compose is not installed or is not available for running task");
-    }
-
 }
 
 int rsc_index(const char* name) {
