@@ -1313,7 +1313,8 @@ int HOST_INFO::get_docker_info(bool& docker_use){
         }
         pclose(fd);
     }
-
+    
+    docker_locations[paths_count] = NULL;
     for (size_t i = 0; i < paths_count; ++i ){
         safe_strcpy(docker_cmd, docker_locations[i]);
         safe_strcat(docker_cmd, " run --rm hello-world 2>&1");
