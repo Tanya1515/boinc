@@ -465,12 +465,12 @@ bool PLAN_CLASS_SPEC::check(
             return false;
         }
 
-        if ((strstr(docker_compose_version, "v1")) && (strstr(sreq.host.docker_compose_version, "not_used"))){
+        if ((strstr(docker_compose_version, "v1")) && (!(strstr(sreq.host.docker_compose_version, "v1")))){
             add_no_work_message("Docker compose (older version: docker-compose) is required, but is not installed or is not available");
             return false;
         }
 
-        if ((strstr(docker_compose_version, "v2")) && (strstr(sreq.host.docker_compose_version, "not_used"))){
+        if ((strstr(docker_compose_version, "v2")) && (!(strstr(sreq.host.docker_compose_version, "v2")))){
             add_no_work_message("Docker compose (newer version: docker compose) is required, but is not installed or is not available");
             return false;
         }

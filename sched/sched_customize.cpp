@@ -889,12 +889,12 @@ static inline bool app_plan_docker(
         return false;
     }
 
-    if ((strstr(plan_class, "v1")) && ((strstr(sreq.host.docker_compose_version, "not_used")))){
+    if ((strstr(plan_class, "v1")) && (!(strstr(sreq.host.docker_compose_version, "v1")))){
         add_no_work_message("Docker compose (older version: docker-compose) is required, but is not installed or is not available");
         return false;
     }
 
-    if ((strstr(plan_class, "v2")) && ((strstr(sreq.host.docker_compose_version, "not_used")))){
+    if ((strstr(plan_class, "v2")) && (!(strstr(sreq.host.docker_compose_version, "v2")))){
         add_no_work_message("Docker compose (newer version: docker compose) is required, but is not installed or is not available");
         return false;
     }

@@ -1289,47 +1289,37 @@ int HOST_INFO::get_docker_info(bool& docker_use){
     char buf[256];
     char buf_command[256];
     FILE* fd;
-    std::size_t paths_count = 0;
-    const char* docker_locations[25];
-    char docker_cmd [MAXPATHLEN+35];
+    FILE* fd_1;
+    char docker_cmd [256];
 
-    char* docker_command = "which -a docker 2>&1";
-    fd = popen(docker_command, "r");
-    if (fd) {
-        while (!feof(fd)){
+    strcpy(docker_cmd, "which -a docker 2>&1");
+    fd = popen(docker_cmd, "r");
+    if (fd){
+        while(!feof(fd)){
             if (fgets(buf, sizeof(buf), fd)){
-                int i, j;
-                for (i = 0, j = 0; buf[i]; i++) {
-                    if (buf[i] != '\n') {
-                        buf[j++] = buf[i];
+                strip_whitespace(buf);
+                if (!(access(buf, X_OK))){
+                    strcpy(docker_cmd, buf);
+                    strcat(docker_cmd, " run --rm hello-world 2>&1");
+                    fd_1 = popen(docker_cmd, "r");
+                    if (fd_1){
+                        while(!feof(fd_1)){
+                            if (fgets(buf_command, sizeof(buf_command), fd_1)){
+                                if (strstr(buf_command, "Hello from Docker!")){
+                                    docker_use = true;
+                                    break;
+                                }
+                            }
+                        }
+                        pclose(fd_1);
                     }
                 }
-                buf[j] = '\0';
-                if (!(access(buf, X_OK))) {
-                    docker_locations[paths_count] = buf;
-                    ++paths_count;
+                if (docker_use){
+                    break;
                 }
             }
         }
         pclose(fd);
-    }
-    
-    docker_locations[paths_count] = NULL;
-    for (size_t i = 0; i < paths_count; ++i ){
-        safe_strcpy(docker_cmd, docker_locations[i]);
-        safe_strcat(docker_cmd, " run --rm hello-world 2>&1");
-        fd = popen(docker_cmd, "r");
-        if (fd){
-            while (!feof(fd)){
-                if (fgets(buf_command, sizeof(buf_command), fd)){
-                    if (strstr(buf, "Hello from Docker!")){
-                        docker_use = true;
-                        break;
-                    }
-                }
-            }
-            pclose(fd);
-        }
     }
     return 0;
 }
